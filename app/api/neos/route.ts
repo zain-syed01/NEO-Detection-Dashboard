@@ -1,27 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { defaultFeedRange } from "@/lib/dates";
+import { defaultFeedRange, validateFeedRange } from "@/lib/dates";
 import { computeMetrics } from "@/lib/metrics";
 import { NasaApiError, fetchNeoFeed } from "@/lib/nasa";
 import { normalizeNeoFeed } from "@/lib/normalize";
 import { rankNeos } from "@/lib/rank";
-import type { NeoSortKey, NeosApiResponse } from "@/lib/types";
-
-const SORT_KEYS: NeoSortKey[] = [
-  "threatScore",
-  "missDistanceKm",
-  "relativeVelocityKmS",
-  "estimatedDiameterKm",
-  "closeApproachDate",
-  "name",
-];
-
-function parseSort(value: string | null): NeoSortKey {
-  if (value && (SORT_KEYS as string[]).includes(value)) {
-    return value as NeoSortKey;
-  }
-  return "threatScore";
-}
+import { neosQuerySchema } from "@/lib/schemas";
+import type { NeosApiResponse } from "@/lib/types";
 
 /**
  * GET /api/neos
@@ -31,23 +16,35 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const defaults = defaultFeedRange();
 
-  const startDate = searchParams.get("start") ?? defaults.startDate;
-  const endDate = searchParams.get("end") ?? defaults.endDate;
-  const sort = parseSort(searchParams.get("sort"));
-  const hazardousOnly = searchParams.get("hazardous") === "true";
-  const maxMissRaw = searchParams.get("maxMissKm");
-  const maxMissKm =
-    maxMissRaw != null && maxMissRaw !== ""
-      ? Number(maxMissRaw)
-      : undefined;
+  const parsed = neosQuerySchema.safeParse({
+    start: searchParams.get("start") ?? undefined,
+    end: searchParams.get("end") ?? undefined,
+    sort: searchParams.get("sort") ?? undefined,
+    hazardous: searchParams.get("hazardous") ?? undefined,
+    maxMissKm: searchParams.get("maxMissKm") ?? undefined,
+  });
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid query parameters.", details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  }
+
+  const startDate = parsed.data.start ?? defaults.startDate;
+  const endDate = parsed.data.end ?? defaults.endDate;
+  const rangeError = validateFeedRange(startDate, endDate);
+  if (rangeError) {
+    return NextResponse.json({ error: rangeError }, { status: 400 });
+  }
 
   try {
     const feed = await fetchNeoFeed(startDate, endDate);
     const normalized = normalizeNeoFeed(feed);
     const objects = rankNeos(normalized, {
-      sort,
-      hazardousOnly,
-      maxMissKm: Number.isFinite(maxMissKm) ? maxMissKm : undefined,
+      sort: parsed.data.sort,
+      hazardousOnly: parsed.data.hazardous ?? false,
+      maxMissKm: parsed.data.maxMissKm,
     });
 
     const payload: NeosApiResponse = {
@@ -66,7 +63,10 @@ export async function GET(request: NextRequest) {
     if (error instanceof NasaApiError) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.status >= 400 && error.status < 600 ? error.status : 502 },
+        {
+          status:
+            error.status >= 400 && error.status < 600 ? error.status : 502,
+        },
       );
     }
 

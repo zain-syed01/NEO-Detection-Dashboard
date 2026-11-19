@@ -88,6 +88,15 @@ export type NeoFilters = {
   maxMissKm?: number;
 };
 
+/** UI filter bar state (maxMissKm kept as string for controlled inputs). */
+export type FiltersBarValues = {
+  startDate: string;
+  endDate: string;
+  sort: NeoSortKey;
+  hazardousOnly: boolean;
+  maxMissKm: string;
+};
+
 export type NeoMetrics = {
   totalTracked: number;
   closestMissKm: number | null;
