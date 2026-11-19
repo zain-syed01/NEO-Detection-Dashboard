@@ -1,6 +1,12 @@
 "use client";
 
 import { HazardBadge } from "@/components/HazardBadge";
+import {
+  formatDiameterKm,
+  formatDistanceKmCompact,
+  formatThreatScore,
+  formatVelocityKmS,
+} from "@/lib/format";
 import type { NeoObject } from "@/lib/types";
 
 type NeoTableProps = {
@@ -10,14 +16,8 @@ type NeoTableProps = {
   loading?: boolean;
 };
 
-function formatKm(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
-  return value.toFixed(0);
-}
-
 /**
- * Sortable-looking NEO table. Sorting is owned by the API / FiltersBar.
+ * NEO table. Sorting is owned by the API / FiltersBar.
  */
 export function NeoTable({
   objects,
@@ -27,32 +27,39 @@ export function NeoTable({
 }: NeoTableProps) {
   if (loading) {
     return (
-      <div className="border border-zinc-800 p-6 text-sm text-zinc-500">
-        Loading close-approach data…
+      <div className="panel-surface space-y-2 p-4" aria-busy="true">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-8 animate-pulse rounded-sm bg-zinc-900/80"
+            style={{ animationDelay: `${i * 60}ms` }}
+          />
+        ))}
       </div>
     );
   }
 
   if (!objects.length) {
     return (
-      <div className="border border-zinc-800 p-6 text-sm text-zinc-500">
-        No near-Earth objects match the current filters.
+      <div className="panel-surface p-6 text-sm text-zinc-500">
+        No near-Earth objects match the current filters. Widen the date range or
+        clear the hazard / miss-distance filters.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto border border-zinc-800">
+    <div className="panel-surface overflow-x-auto">
       <table className="min-w-full text-left text-sm">
-        <thead className="bg-zinc-950 text-xs uppercase tracking-wider text-zinc-500">
+        <thead className="bg-zinc-950/90 text-[11px] uppercase tracking-[0.14em] text-zinc-500">
           <tr>
-            <th className="px-3 py-2 font-medium">Name</th>
-            <th className="px-3 py-2 font-medium">Approach</th>
-            <th className="px-3 py-2 font-medium">Miss (km)</th>
-            <th className="px-3 py-2 font-medium">Velocity</th>
-            <th className="px-3 py-2 font-medium">Diameter</th>
-            <th className="px-3 py-2 font-medium">Threat</th>
-            <th className="px-3 py-2 font-medium">Status</th>
+            <th className="px-3 py-2.5 font-medium">Name</th>
+            <th className="px-3 py-2.5 font-medium">Approach</th>
+            <th className="px-3 py-2.5 font-medium">Miss (km)</th>
+            <th className="px-3 py-2.5 font-medium">Velocity</th>
+            <th className="px-3 py-2.5 font-medium">Diameter</th>
+            <th className="px-3 py-2.5 font-medium">Threat</th>
+            <th className="px-3 py-2.5 font-medium">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -69,25 +76,26 @@ export function NeoTable({
                     onSelect?.(neo);
                   }
                 }}
-                className={`cursor-pointer border-t border-zinc-900 hover:bg-zinc-900/80 ${
-                  selected ? "bg-zinc-900" : ""
+                className={`border-t border-zinc-900/90 hover:bg-zinc-900/70 ${
+                  selected ? "bg-zinc-900/90" : ""
                 } ${neo.isPotentiallyHazardous ? "hazard-row" : ""}`}
+                style={{ cursor: "pointer" }}
               >
                 <td className="px-3 py-2 text-zinc-100">{neo.name}</td>
                 <td className="px-3 py-2 font-mono text-zinc-400">
                   {neo.closeApproachDate}
                 </td>
                 <td className="px-3 py-2 font-mono text-zinc-300">
-                  {formatKm(neo.missDistanceKm)}
+                  {formatDistanceKmCompact(neo.missDistanceKm)}
                 </td>
                 <td className="px-3 py-2 font-mono text-zinc-300">
-                  {neo.relativeVelocityKmS.toFixed(2)} km/s
+                  {formatVelocityKmS(neo.relativeVelocityKmS)}
                 </td>
                 <td className="px-3 py-2 font-mono text-zinc-300">
-                  {neo.estimatedDiameterKm.toFixed(3)} km
+                  {formatDiameterKm(neo.estimatedDiameterKm)}
                 </td>
                 <td className="px-3 py-2 font-mono text-cyan-200">
-                  {neo.threatScore.toFixed(1)}
+                  {formatThreatScore(neo.threatScore)}
                 </td>
                 <td className="px-3 py-2">
                   <HazardBadge hazardous={neo.isPotentiallyHazardous} />

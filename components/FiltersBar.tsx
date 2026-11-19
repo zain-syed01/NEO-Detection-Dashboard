@@ -1,14 +1,8 @@
 "use client";
 
-import type { NeoSortKey } from "@/lib/types";
+import type { FiltersBarValues, NeoSortKey } from "@/lib/types";
 
-export type FiltersBarValues = {
-  startDate: string;
-  endDate: string;
-  sort: NeoSortKey;
-  hazardousOnly: boolean;
-  maxMissKm: string;
-};
+export type { FiltersBarValues };
 
 type FiltersBarProps = {
   values: FiltersBarValues;
@@ -28,7 +22,6 @@ const SORT_OPTIONS: { value: NeoSortKey; label: string }[] = [
 
 /**
  * Date range + ranking controls for the dashboard.
- * Wire this to URL search params or local state in page.tsx.
  */
 export function FiltersBar({
   values,
@@ -39,7 +32,7 @@ export function FiltersBar({
   return (
     <section
       aria-label="Filters"
-      className="flex flex-col gap-3 border border-zinc-800 bg-zinc-950/60 p-4 lg:flex-row lg:flex-wrap lg:items-end"
+      className="panel-surface flex flex-col gap-3 p-4 lg:flex-row lg:flex-wrap lg:items-end"
     >
       <label className="flex flex-col gap-1 text-xs text-zinc-400">
         Start
@@ -48,7 +41,7 @@ export function FiltersBar({
           value={values.startDate}
           disabled={disabled}
           onChange={(e) => onChange({ ...values, startDate: e.target.value })}
-          className="border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+          className="control-input"
         />
       </label>
 
@@ -59,7 +52,7 @@ export function FiltersBar({
           value={values.endDate}
           disabled={disabled}
           onChange={(e) => onChange({ ...values, endDate: e.target.value })}
-          className="border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+          className="control-input"
         />
       </label>
 
@@ -71,7 +64,7 @@ export function FiltersBar({
           onChange={(e) =>
             onChange({ ...values, sort: e.target.value as NeoSortKey })
           }
-          className="border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+          className="control-input"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -90,7 +83,7 @@ export function FiltersBar({
           value={values.maxMissKm}
           disabled={disabled}
           onChange={(e) => onChange({ ...values, maxMissKm: e.target.value })}
-          className="border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-100"
+          className="control-input"
         />
       </label>
 
@@ -111,7 +104,7 @@ export function FiltersBar({
         type="button"
         disabled={disabled}
         onClick={onRefresh}
-        className="border border-cyan-700/60 bg-cyan-950/40 px-4 py-2 text-sm font-medium text-cyan-100 hover:bg-cyan-900/40 disabled:opacity-50"
+        className="border border-cyan-700/60 bg-cyan-950/40 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-900/40 disabled:opacity-50"
       >
         Apply
       </button>

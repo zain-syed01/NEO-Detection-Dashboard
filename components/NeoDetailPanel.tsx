@@ -1,5 +1,12 @@
-import type { NeoObject } from "@/lib/types";
 import { HazardBadge } from "@/components/HazardBadge";
+import {
+  formatDiameterKm,
+  formatDistanceKm,
+  formatMissRelativeToMoon,
+  formatThreatScore,
+  formatVelocityKmS,
+} from "@/lib/format";
+import type { NeoObject } from "@/lib/types";
 
 type NeoDetailPanelProps = {
   neo: NeoObject | null;
@@ -11,7 +18,7 @@ type NeoDetailPanelProps = {
 export function NeoDetailPanel({ neo }: NeoDetailPanelProps) {
   if (!neo) {
     return (
-      <aside className="border border-zinc-800 bg-zinc-950/50 p-4 text-sm text-zinc-500">
+      <aside className="panel-surface flex min-h-72 items-center p-4 text-sm text-zinc-500">
         Select an object from the table or chart to inspect close-approach
         details.
       </aside>
@@ -19,10 +26,14 @@ export function NeoDetailPanel({ neo }: NeoDetailPanelProps) {
   }
 
   return (
-    <aside className="border border-zinc-800 bg-zinc-950/80 p-4">
+    <aside
+      className={`panel-surface p-4 ${
+        neo.isPotentiallyHazardous ? "hazard-panel" : ""
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
             Selected object
           </p>
           <h2 className="mt-1 text-lg text-zinc-50">{neo.name}</h2>
@@ -38,26 +49,29 @@ export function NeoDetailPanel({ neo }: NeoDetailPanelProps) {
         <div>
           <dt className="text-zinc-500">Miss distance</dt>
           <dd className="font-mono text-zinc-200">
-            {neo.missDistanceKm.toLocaleString()} km
+            {formatDistanceKm(neo.missDistanceKm)}
+            <span className="ml-2 text-xs text-zinc-500">
+              ({formatMissRelativeToMoon(neo.missDistanceKm)})
+            </span>
           </dd>
         </div>
         <div>
           <dt className="text-zinc-500">Relative velocity</dt>
           <dd className="font-mono text-zinc-200">
-            {neo.relativeVelocityKmS.toFixed(3)} km/s
+            {formatVelocityKmS(neo.relativeVelocityKmS)}
           </dd>
         </div>
         <div>
           <dt className="text-zinc-500">Estimated diameter</dt>
           <dd className="font-mono text-zinc-200">
-            {neo.estimatedDiameterMinKm.toFixed(3)} –{" "}
-            {neo.estimatedDiameterMaxKm.toFixed(3)} km
+            {formatDiameterKm(neo.estimatedDiameterMinKm)} –{" "}
+            {formatDiameterKm(neo.estimatedDiameterMaxKm)}
           </dd>
         </div>
         <div>
           <dt className="text-zinc-500">Threat score</dt>
           <dd className="font-mono text-cyan-200">
-            {neo.threatScore.toFixed(1)} / 100
+            {formatThreatScore(neo.threatScore)} / 100
           </dd>
         </div>
         <div>
