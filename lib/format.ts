@@ -15,6 +15,17 @@ export function formatDistanceKmCompact(value: number): string {
   return value.toFixed(0);
 }
 
+/** Short tick labels for chart axes (no unit suffix — unit lives in the axis title). */
+export function formatMissDistanceAxisTick(value: number): string {
+  if (!Number.isFinite(value)) return "";
+  if (value >= 1_000_000) {
+    const millions = value / 1_000_000;
+    return millions >= 10 ? `${millions.toFixed(0)}M` : `${millions.toFixed(1)}M`;
+  }
+  if (value >= 1_000) return `${(value / 1_000).toFixed(0)}k`;
+  return `${Math.round(value)}`;
+}
+
 export function formatVelocityKmS(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "—";
   return `${value.toFixed(2)} km/s`;

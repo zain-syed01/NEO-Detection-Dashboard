@@ -25,10 +25,20 @@ type Point = {
   id: string;
   name: string;
   x: number;
+  /** Miss distance in millions of km (chart units). */
   y: number;
+  /** Original miss distance in km (tooltip / selection). */
+  missDistanceKm: number;
   z: number;
   hazardous: boolean;
 };
+
+function formatMillionKmTick(value: number): string {
+  if (!Number.isFinite(value)) return "";
+  if (value >= 10) return value.toFixed(0);
+  if (value >= 1) return value.toFixed(1);
+  return value.toFixed(2);
+}
 
 /**
  * Diameter (X) vs miss distance (Y) scatter plot.
@@ -44,7 +54,8 @@ export function NeoScatterChart({
     id: neo.id,
     name: neo.name,
     x: neo.estimatedDiameterKm,
-    y: Math.max(neo.missDistanceKm, 1),
+    y: Math.max(neo.missDistanceKm / 1_000_000, 0.001),
+    missDistanceKm: neo.missDistanceKm,
     z: neo.relativeVelocityKmS,
     hazardous: neo.isPotentiallyHazardous,
   }));
@@ -91,22 +102,22 @@ export function NeoScatterChart({
         </div>
       </div>
 
-      <div className="h-72 w-full p-2 sm:h-80">
+      <div className="h-72 w-full px-2 pb-1 pt-2 sm:h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 16, right: 16, bottom: 20, left: 8 }}>
+          <ScatterChart margin={{ top: 12, right: 16, bottom: 36, left: 52 }}>
             <CartesianGrid stroke="#27272a" strokeDasharray="3 3" />
             <XAxis
               type="number"
               dataKey="x"
               name="Diameter"
-              unit=" km"
               stroke="#71717a"
               tick={{ fill: "#a1a1aa", fontSize: 11 }}
+              tickMargin={8}
               label={{
                 value: "Estimated diameter (km)",
                 position: "insideBottom",
-                offset: -8,
-                fill: "#71717a",
+                offset: -22,
+                fill: "#a1a1aa",
                 fontSize: 11,
               }}
             />
@@ -114,18 +125,21 @@ export function NeoScatterChart({
               type="number"
               dataKey="y"
               name="Miss distance"
-              unit=" km"
               stroke="#71717a"
               tick={{ fill: "#a1a1aa", fontSize: 11 }}
+              tickFormatter={formatMillionKmTick}
+              tickMargin={6}
               scale="log"
               domain={["auto", "auto"]}
-              width={72}
+              width={44}
               label={{
-                value: "Miss distance (km)",
+                value: "Miss distance (million km)",
                 angle: -90,
-                position: "insideLeft",
-                fill: "#71717a",
+                position: "left",
+                offset: 0,
+                fill: "#a1a1aa",
                 fontSize: 11,
+                style: { textAnchor: "middle" },
               }}
             />
             <ZAxis type="number" dataKey="z" range={[40, 180]} name="Velocity" />
@@ -136,16 +150,22 @@ export function NeoScatterChart({
                 border: "1px solid #3f3f46",
                 fontSize: 12,
               }}
-              formatter={(value, name) => {
-                const numeric =
-                  typeof value === "number" ? value : Number(value ?? 0);
+              formatter={(value, name, item) => {
+                const payload = item?.payload as Point | undefined;
                 if (name === "Diameter") {
+                  const numeric =
+                    typeof value === "number" ? value : Number(value ?? 0);
                   return [`${numeric.toFixed(4)} km`, "Diameter"];
                 }
                 if (name === "Miss distance") {
-                  return [formatDistanceKm(numeric), "Miss distance"];
+                  return [
+                    formatDistanceKm(payload?.missDistanceKm ?? Number(value) * 1_000_000),
+                    "Miss distance",
+                  ];
                 }
                 if (name === "Velocity") {
+                  const numeric =
+                    typeof value === "number" ? value : Number(value ?? 0);
                   return [formatVelocityKmS(numeric), "Velocity"];
                 }
                 return [String(value ?? ""), String(name ?? "")];
@@ -180,6 +200,10 @@ export function NeoScatterChart({
           </ScatterChart>
         </ResponsiveContainer>
       </div>
+      <p className="border-t border-zinc-800/80 px-3 py-2 text-[11px] text-zinc-500">
+        Y-axis uses a log scale in million km so close and distant approaches stay
+        readable. Hover a point for the exact miss distance.
+      </p>
       <p className="sr-only">
         Scatter plot of estimated asteroid diameter versus miss distance.
         Potentially hazardous asteroids are highlighted. Bubble size encodes
