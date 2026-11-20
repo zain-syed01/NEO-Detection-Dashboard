@@ -34,12 +34,25 @@ function subscribeNoop() {
   return () => {};
 }
 
+/** Stable empty snapshot — React requires getServerSnapshot to return a cached value. */
+const EMPTY_FEED_RANGE = { startDate: "", endDate: "" };
+
+/** Cache the client date window so getSnapshot returns a stable reference. */
+let clientFeedRangeCache: { startDate: string; endDate: string } | null = null;
+
+function getClientFeedRange() {
+  if (!clientFeedRangeCache) {
+    clientFeedRangeCache = defaultFeedRange();
+  }
+  return clientFeedRangeCache;
+}
+
 /** Client-only default date window (empty on the server / during prerender). */
 function useClientFeedRange() {
   return useSyncExternalStore(
     subscribeNoop,
-    () => defaultFeedRange(),
-    () => ({ startDate: "", endDate: "" }),
+    getClientFeedRange,
+    () => EMPTY_FEED_RANGE,
   );
 }
 
