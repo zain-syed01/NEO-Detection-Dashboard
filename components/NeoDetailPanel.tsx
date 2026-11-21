@@ -1,4 +1,5 @@
 import { HazardBadge } from "@/components/HazardBadge";
+import { WatchlistButton } from "@/components/WatchlistButton";
 import {
   formatDiameterKm,
   formatDistanceKm,
@@ -90,6 +91,8 @@ export function NeoDetailPanel({ neo }: NeoDetailPanelProps) {
       >
         Open NASA JPL entry
       </a>
+
+      <WatchlistButton neo={neo} />
     </aside>
   );
 }

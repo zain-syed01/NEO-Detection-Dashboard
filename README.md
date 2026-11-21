@@ -2,6 +2,8 @@
 
 Mission-control dashboard that pulls live near-Earth object (NEO) close-approach data from NASA's **NeoWs** API, normalizes nested JSON on the server, ranks objects with a transparent threat score, and visualizes diameter vs miss distance with Recharts.
 
+Authenticated users can save asteroids to a personal **My Watchlist** backed by Supabase Auth + Postgres.
+
 ## Stack
 
 - Next.js (App Router) + TypeScript
@@ -9,6 +11,7 @@ Mission-control dashboard that pulls live near-Earth object (NEO) close-approach
 - Recharts
 - Zod (query validation)
 - Vitest (unit tests for parse / rank / metrics)
+- Supabase (Auth + watchlist database)
 
 ## Features
 
@@ -18,67 +21,56 @@ Mission-control dashboard that pulls live near-Earth object (NEO) close-approach
 - PHA visual alerts (pulse badge + row accent)
 - Detail panel with lunar-distance context + NASA JPL link
 - Filter state synced to the URL query string
-- Loading skeletons, empty states, and API error retry
-
-## Project layout
-
-```text
-app/
-  page.tsx
-  api/neos/route.ts
-components/
-  Dashboard.tsx
-  MetricsGrid.tsx
-  FiltersBar.tsx
-  StatusBar.tsx
-  NeoScatterChart.tsx
-  NeoTable.tsx
-  NeoDetailPanel.tsx
-  HazardBadge.tsx
-lib/
-  types.ts
-  schemas.ts
-  nasa.ts
-  normalize.ts
-  rank.ts
-  metrics.ts
-  dates.ts
-  format.ts
-  filters.ts
-tests/
-  *.test.ts
-```
+- Supabase email/password auth
+- Save / remove asteroids on a per-user watchlist
 
 ## Setup
 
-### 1. NASA API key (required for reliable use)
-
-1. Go to [https://api.nasa.gov/](https://api.nasa.gov/)
-2. Fill the form and generate a key
-3. You want access to **NeoWs** (Near Earth Object Web Service) — same key unlocks NeoWs, APOD, Mars Rover, etc.
-
-`DEMO_KEY` works for a quick smoke test but rate-limits fast. Use your own key.
-
-### 2. Install & configure
+### 1. One env file: `.env.local`
 
 ```bash
 npm install
 cp .env.example .env.local
 ```
 
-Put your key in `.env.local`:
+Edit **`.env.local`** (this is the only file you need for secrets):
 
 ```bash
-NASA_API_KEY=your_key_here
+NASA_API_KEY=your_nasa_key
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ```
 
-### 3. Run
+| Variable | Where to get it |
+|----------|-----------------|
+| `NASA_API_KEY` | [api.nasa.gov](https://api.nasa.gov/) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API → `anon` `public` key |
+
+Do **not** put the `service_role` key in the frontend env file.
+
+### 2. Create the watchlist table
+
+1. Open Supabase → **SQL Editor** → New query
+2. Paste and run the contents of `supabase/schema.sql`
+3. Confirm the `watchlist` table exists under **Table Editor**
+
+### 3. (Recommended) Easier local sign-up
+
+Supabase → **Authentication** → **Providers** → Email  
+Turn **off** “Confirm email” while developing so you can sign up and use the app immediately.
+
+### 4. Run
 
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+- Sign up / sign in at `/login`
+- Select an asteroid → **Save to watchlist**
+- View saves at `/watchlist`
 
 ## Scripts
 
@@ -116,11 +108,12 @@ Tune weights in `lib/rank.ts`.
 ## Notes
 
 - NeoWs `/feed` allows at most **7 days** per request
-- Prefer a personal `NASA_API_KEY`
-- No auth or database in v1 — focus is parsing, ranking, and visualization
+- Watchlist rows are protected with Supabase Row Level Security (users only see their own rows)
+- No email/SMS alert system in this version
 
 ## Resume bullets (suggested)
 
 - Architected a responsive web application utilizing the NASA NeoWs API to track, filter, and visualize real-time asteroid close-approach data
 - Programmed server-side filtering algorithms to parse complex NASA JSON payloads, dynamically categorizing objects by miss-distance, velocity, and hazard classification
 - Integrated Recharts to map asteroid diameter against miss distance, converting raw NeoWs fields into an interactive data visualization dashboard
+- Implemented Supabase authentication and a Postgres-backed watchlist so users can save near-Earth objects of interest

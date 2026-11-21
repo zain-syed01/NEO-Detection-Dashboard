@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+
+import { AuthProvider } from "@/components/AuthProvider";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 const sans = Space_Grotesk({
@@ -32,7 +35,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${sans.variable} ${display.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        {children}
+        <AuthProvider>
+          <SiteHeader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
