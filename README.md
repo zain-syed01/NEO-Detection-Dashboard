@@ -210,7 +210,7 @@ Example response shape:
 
 ## Threat score
 
-Transparent **0–100** composite in `lib/rank.ts` (not ML):
+Transparent **0–100** composite in `lib/rank.ts` :
 
 | Factor | Weight |
 |--------|--------|
@@ -219,7 +219,7 @@ Transparent **0–100** composite in `lib/rank.ts` (not ML):
 | Relative velocity | 20% |
 | Estimated diameter | 15% |
 
-This is a dashboard ranking heuristic for prioritization — not an official NASA impact probability.
+
 
 ---
 
@@ -247,12 +247,6 @@ Unit tests cover date-window validation, NeoWs normalization, threat scoring / f
 
 ---
 
-## Suggested resume bullets
-
-- Architected a responsive web application utilizing the NASA NeoWs API to track, filter, and visualize real-time asteroid close-approach data  
-- Programmed server-side filtering algorithms to parse complex NASA JSON payloads, dynamically categorizing objects by miss-distance, velocity, and hazard classification  
-- Integrated Recharts to map asteroid diameter against miss distance in an interactive dashboard  
-- Implemented Supabase authentication and a Postgres-backed watchlist with row-level security so users can save near-Earth objects of interest  
 
 ---
 
