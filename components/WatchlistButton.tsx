@@ -88,7 +88,8 @@ export function WatchlistButton({ neo }: WatchlistButtonProps) {
   if (!configured) {
     return (
       <p className="mt-4 text-xs text-zinc-600">
-        Configure Supabase in `.env.local` to enable watchlists.
+        Add Supabase keys to `.env` / `.env.local` and restart the dev server to enable
+        watchlists.
       </p>
     );
   }

@@ -11,7 +11,6 @@ import {
 import type { User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type AuthContextValue = {
   user: User | null;
@@ -27,8 +26,13 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => {},
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const configured = isSupabaseConfigured();
+type AuthProviderProps = {
+  children: React.ReactNode;
+  /** Detected on the server from .env / .env.local so the client can trust it. */
+  configured: boolean;
+};
+
+export function AuthProvider({ children, configured }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(configured);
 

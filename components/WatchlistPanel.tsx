@@ -72,9 +72,13 @@ export function WatchlistPanel() {
   if (!configured) {
     return (
       <div className="panel-surface p-6 text-sm text-zinc-400">
-        Add your Supabase URL and anon key to <code className="text-zinc-200">.env.local</code>,
-        then run <code className="text-zinc-200">supabase/schema.sql</code> in the Supabase SQL
-        Editor.
+        Add <code className="text-zinc-200">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+        <code className="text-zinc-200">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to{" "}
+        <code className="text-zinc-200">.env</code> or{" "}
+        <code className="text-zinc-200">.env.local</code>, restart{" "}
+        <code className="text-zinc-200">npm run dev</code>, then run{" "}
+        <code className="text-zinc-200">supabase/schema.sql</code> in the Supabase SQL Editor if
+        you have not already.
       </div>
     );
   }

@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "@/components/AuthProvider";
 import { createClient } from "@/lib/supabase/client";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type Mode = "signin" | "signup";
 
 export function AuthForm() {
   const router = useRouter();
-  const configured = isSupabaseConfigured();
+  const { configured } = useAuth();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +24,9 @@ export function AuthForm() {
     setMessage(null);
 
     if (!configured) {
-      setError("Supabase is not configured. Add keys to .env.local first.");
+      setError(
+        "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env or .env.local, then restart npm run dev.",
+      );
       return;
     }
 

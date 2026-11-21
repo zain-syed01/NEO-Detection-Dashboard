@@ -22,7 +22,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-3 text-sm">
           {!configured ? (
             <span className="hidden text-xs text-zinc-600 sm:inline">
-              Add Supabase keys to enable auth
+              Add Supabase keys in .env to enable auth
             </span>
           ) : loading ? (
             <span className="text-xs text-zinc-500">Checking session…</span>

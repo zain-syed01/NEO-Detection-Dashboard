@@ -26,20 +26,24 @@ Authenticated users can save asteroids to a personal **My Watchlist** backed by 
 
 ## Setup
 
-### 1. One env file: `.env.local`
+### 1. One env file: `.env` or `.env.local`
+
+Either filename works with Next.js. `.env.local` is common; `.env` is fine too.
 
 ```bash
 npm install
 cp .env.example .env.local
 ```
 
-Edit **`.env.local`** (this is the only file you need for secrets):
+Put secrets in that file:
 
 ```bash
 NASA_API_KEY=your_nasa_key
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ```
+
+After changing env vars, restart `npm run dev`.
 
 | Variable | Where to get it |
 |----------|-----------------|

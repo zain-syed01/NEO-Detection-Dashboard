@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 
 import { AuthProvider } from "@/components/AuthProvider";
 import { SiteHeader } from "@/components/SiteHeader";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import "./globals.css";
 
 const sans = Space_Grotesk({
@@ -29,13 +30,15 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  const supabaseConfigured = isSupabaseConfigured();
+
   return (
     <html
       lang="en"
       className={`${sans.variable} ${display.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        <AuthProvider>
+        <AuthProvider configured={supabaseConfigured}>
           <SiteHeader />
           {children}
         </AuthProvider>
